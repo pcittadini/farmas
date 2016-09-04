@@ -120,7 +120,6 @@
       <root url="file://$USER_HOME$/go/src/debug/macho/testdata" />
       <root url="file://$PROJECT_DIR$/../../golang/protobuf/protoc-gen-go/testdata" />
       <root url="file://$PROJECT_DIR$/../../cpuguy83/go-md2man/.git" />
-      <root url="file://$PROJECT_DIR$/coreos-ansible/coreos-ansible-example/.vagrant" />
       <root url="file://$PROJECT_DIR$/../../coreos/fleet/.git" />
       <root url="file://$USER_HOME$/go/src/strconv/testdata" />
       <root url="file://$PROJECT_DIR$/../../kr/text/.git" />
@@ -197,6 +196,7 @@
       <root url="file://$PROJECT_DIR$/../../spf13/cobra/.git" />
       <root url="file://$PROJECT_DIR$/../../../golang.org/x/crypto/sha3/testdata" />
       <root url="file://$PROJECT_DIR$/../../spf13/cast/.git" />
+      <root url="file://$PROJECT_DIR$/.git" />
       <root url="file://$PROJECT_DIR$/../../derekparker/delve/.git" />
       <root url="file://$PROJECT_DIR$/../../hashicorp/go-cleanhttp/.git" />
       <root url="file://$PROJECT_DIR$/../../../golang.org/x/tools/cmd/bundle/testdata" />
