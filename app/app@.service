@@ -1,0 +1,26 @@
+[Unit]
+Description=App
+After=docker.service
+Requires=docker.service
+After=etcd2.service
+Requires=etcd2.service
+
+[Service]
+EnvironmentFile=/etc/environment
+
+ExecStartPre=/usr/bin/etcdctl set /services/nginx/app/root 'www.app.io'
+ExecStartPre=/usr/bin/etcdctl set /services/nginx/app/servers/%i '{"ip": "${COREOS_PRIVATE_IPV4}", "port": "8080"}'
+
+ExecStartPre=-/usr/bin/docker kill app-%i
+ExecStartPre=-/usr/bin/docker rm app-%i
+ExecStartPre=/usr/bin/docker pull snowpunk/app:latest
+
+ExecStart=/usr/bin/docker run --net=host --rm --name=app-%i --publish 8080:8080 snowpunk/app:latest
+
+ExecStop=/usr/bin/docker stop app-%i
+ExecStop=-/usr/bin/docker rm app-%i
+
+ExecStop=-/usr/bin/etcdctl rm --recursive /services/nginx/app/servers/%i
+
+[X-Fleet]
+Conflicts=app@*.service

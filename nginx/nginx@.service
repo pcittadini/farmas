@@ -1,0 +1,22 @@
+[Unit]
+Description=Nginx
+After=docker.service
+Requires=docker.service
+After=etcd2.service
+Requires=etcd2.service
+
+[Service]
+EnvironmentFile=/etc/environment
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/etcdctl mkdir /services/nginx
+ExecStartPre=-/usr/bin/docker kill nginx-%i
+ExecStartPre=-/usr/bin/docker rm nginx-%i
+ExecStartPre=/usr/bin/docker pull snowpunk/nginx-confd
+
+ExecStart=/usr/bin/docker run --rm --name=nginx-%i --publish 80:80 snowpunk/nginx-confd
+
+ExecStop=/usr/bin/docker stop nginx-%i
+ExecStartPre=-/usr/bin/docker rm nginx-%i
+
+[X-Fleet]
+Conflicts=nginx@*.service

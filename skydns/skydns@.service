@@ -1,0 +1,14 @@
+[Unit]
+Description=SkyDNS service discovery
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=-/usr/bin/env docker kill skydns-%i
+ExecStartPre=-/usr/bin/env docker rm skydns-%i
+ExecStartPre=/usr/bin/env docker pull skynetservices/skydns
+ExecStart=/usr/bin/env bash -c '/usr/bin/env docker run --name skydns-%i -p 5353:53 -p 5353:53/udp -e ETCD_MACHINES="http://$(ifconfig docker0 | awk \'/\<inet\>/ { print $2}\'):4001" skynetservices/skydns'
+ExecStop=-/usr/bin/env docker stop skydns-%i
+
+[Install]
+WantedBy=multi-user.target

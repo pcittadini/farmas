@@ -1,0 +1,30 @@
+#!/bin/bash
+
+source /etc/environment
+name=$(cat /etc/machine-id)
+
+if [ ! -f /opt/consul ]; then
+        mkdir /opt
+        mkdir /var/lib/consul
+        curl http://storage.googleapis.com/ifup-org-tilde/consul-0.2.0-linux-x86-64.lzma | lzcat > /opt/consul
+        chmod +x /opt/consul
+fi
+
+FLAGS="-help "
+
+if etcdctl mk /consul.io/bootstrap/started true; then
+        flags="${flags} -bootstrap"
+else
+        echo "This cluster has already been bootstrapped"
+fi
+
+etcdctl set /consul.io/bootstrap/machines/${name} ${COREOS_PRIVATE_IPV4}
+
+flags=$(etcdctl ls /consul.io/bootstrap/machines | while read line; do
+        ip=$(etcdctl get ${line})
+        echo ${flags} -join ${ip}
+done)
+
+echo ${flags}
+
+/opt/consul agent -data-dir /var/lib/consul -server ${flags}

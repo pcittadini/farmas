@@ -1,0 +1,18 @@
+[Unit]
+Description=skydns
+
+[Service]
+EnvironmentFile=/etc/environment
+TimeoutStartSec=20m
+User=core
+
+ExecStartPre=/usr/bin/docker pull snowpunk/skydns:latest
+ExecStart=/usr/bin/docker run --name skydns-%i -p 5353:53 -p 5353:53/udp snowpunk/skydns:latest
+ExecStop=/usr/bin/docker stop skydns-%i
+ExecStopPost=/usr/bin/docker rm skydns-%i
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+
