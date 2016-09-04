@@ -1,0 +1,16 @@
+[Unit]
+Description=Consul bootstrap sidekick
+PartOf=consul-agent@%i.service
+After=consul-agent@%i.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+EnvironmentFile=/etc/environment
+
+ExecStart=/bin/sh -c "while true; do etcdctl set /consul/nodes/%m $COREOS_PRIVATE_IPV4 --ttl 60; docker exec consul consul join $(etcdctl get $(etcdctl ls /consul/nodes | tail -1)); sleep 45; done"
+
+ExecStop=/usr/bin/etcdctl rm /consul/nodes/%m
+
+[X-Fleet]
+MachineOf=consul-agent@%i.service

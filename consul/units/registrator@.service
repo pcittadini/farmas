@@ -1,0 +1,20 @@
+[Unit]
+Description=Registrator
+PartOf=consul-agent@%i.service
+After=consul-agent@%i.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker kill registrator
+ExecStartPre=-/usr/bin/docker rm registrator
+ExecStartPre=/usr/bin/docker pull gliderlabs/registrator
+
+ExecStart=/usr/bin/docker run --name registrator -h %H -v /var/run/docker.sock:/tmp/docker.sock --link consul:consul gliderlabs/registrator:latest consul://consul:8500
+
+ExecStop=/usr/bin/docker stop registrator
+
+[X-Fleet]
+Conflicts=registrator@*.service
+MachineOf=consul-agent@%i.service

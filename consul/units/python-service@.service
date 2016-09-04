@@ -1,0 +1,20 @@
+[Unit]
+Description=Python service
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+
+ExecStartPre=-/usr/bin/docker kill python-service
+ExecStartPre=-/usr/bin/docker rm python-service
+ExecStartPre=/usr/bin/docker pull jlordiales/python-micro-service
+
+ExecStart=/usr/bin/docker run --name python-service -P jlordiales/python-micro-service
+
+ExecStop=/usr/bin/docker stop python-service
+
+[X-Fleet]
+Conflicts=python-service@*.service
+MachineOf=registrator@%i.service

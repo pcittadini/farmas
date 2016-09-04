@@ -1,0 +1,24 @@
+[Unit]
+Description=Consul agent container
+Requires=docker.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+RestartSec=30
+Restart=on-failure
+EnvironmentFile=/etc/environment
+
+ExecStartPre=-/usr/bin/docker kill consul
+ExecStartPre=-/usr/bin/docker rm consul
+ExecStartPre=/usr/bin/docker pull progrium/consul
+ExecStartPre=-/usr/bin/docker run --net=host --privileged --rm cap10morgan/conntrack -F
+
+ExecStart=/home/core/start_consul.sh %i
+
+ExecStop=-/usr/bin/etcdctl rm /consul/nodes/%m
+ExecStop=-/bin/sh -c "RANDOM_AGENT_IP=$(etcdctl get $(etcdctl ls /consul/nodes | tail -1)); curl $RANDOM_AGENT_IP:8500/v1/agent/force-leave/$HOSTNAME"
+ExecStop=-/usr/bin/docker stop consul
+
+[X-Fleet]
+Conflicts=consul-agent@*.service
