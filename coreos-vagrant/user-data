@@ -50,6 +50,6 @@ coreos:
 
         [Service]
         ExecStartPre=-/usr/bin/mkdir /opt
-        ExecStartPre=-/usr/bin/wget --retry-connrefused -t 0 -nc -O /opt/bootstrap-consul https://gist.githubusercontent.com/philips/56fa3f5dae9060fbd100/raw/b0190c7a01a3500e12f92946e6bbf77bc418c3ca/gistfile1.txt
+        ExecStartPre=-/usr/bin/wget --retry-connrefused -t 0 -nc -O /opt/bootstrap-consul https://github.com/pcittadini/farmas/blob/4dac4556dfbfe1dd8807a6f2795f9a26d2e694ce/coreos-vagrant/gistfile1.txt
         ExecStartPre=-/usr/bin/chmod +x /opt/bootstrap-consul
         ExecStart=/opt/bootstrap-consul

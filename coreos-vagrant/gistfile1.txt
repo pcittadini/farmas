@@ -27,4 +27,4 @@ done)
 
 echo ${flags}
 
-/opt/consul agent -data-dir /var/lib/consul -server ${flags}
+/opt/consul agent -data-dir /var/lib/consul -server -clients=0.0.0.0 ${flags}
