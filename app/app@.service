@@ -15,7 +15,7 @@ ExecStartPre=-/usr/bin/docker kill app-%i
 ExecStartPre=-/usr/bin/docker rm app-%i
 ExecStartPre=/usr/bin/docker pull snowpunk/app:latest
 
-ExecStart=/usr/bin/docker run --net=host --rm --name=app-%i --publish 8080:8080 snowpunk/app:latest
+ExecStart=/usr/bin/docker run --rm -e COREOS_PRIVATE_IPV4=${COREOS_PRIVATE_IPV4} --name=app-%i --publish 8080:8080 snowpunk/app:latest
 
 ExecStop=/usr/bin/docker stop app-%i
 ExecStop=-/usr/bin/docker rm app-%i

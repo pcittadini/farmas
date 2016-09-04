@@ -1,12 +1,11 @@
 #cloud-config
-
 coreos:
   update:
     # https://coreos.com/os/docs/latest/cloud-config.html
-    etcd-lock: on
+    reboot-strategy: etcd-lock
   etcd2:
     #generate a new token for each unique cluster from https://discovery.etcd.io/new
-    discovery: https://discovery.etcd.io/2b83e3eedd469f1277f09c068d5a681c
+    discovery: https://discovery.etcd.io/6013fd2d337a017e8bfc6d601beba4b4
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: http://$public_ipv4:2379
     initial-advertise-peer-urls: http://$private_ipv4:2380
@@ -41,15 +40,29 @@ coreos:
 
         [Install]
         WantedBy=sockets.target
-    - name: consul.service
-      command: start
-      runtime: no
-      content: |
-        [Unit]
-        Description=fleet
 
-        [Service]
-        ExecStartPre=-/usr/bin/mkdir /opt
-        ExecStartPre=-/usr/bin/wget --retry-connrefused -t 0 -nc -O /opt/bootstrap-consul https://github.com/pcittadini/farmas/blob/4dac4556dfbfe1dd8807a6f2795f9a26d2e694ce/coreos-vagrant/gistfile1.txt
-        ExecStartPre=-/usr/bin/chmod +x /opt/bootstrap-consul
-        ExecStart=/opt/bootstrap-consul
+write_files:
+    - path: /home/core/start_consul.sh
+      owner: root:root
+      permissions: 0744
+      content: |
+        #!/bin/sh
+        AGENT_NUMBER=$1
+        EXPECTED_CONSUL_SERVERS=3
+        DOCKER_BRIDGE_IP=$(ifconfig docker0 | grep 'inet ' | awk '{print $2}')
+        CONSUL_CMD="/usr/bin/docker run --name consul -h $HOSTNAME \
+                  -p $COREOS_PRIVATE_IPV4:8300:8300  \
+                  -p $COREOS_PRIVATE_IPV4:8301:8301  \
+                  -p $COREOS_PRIVATE_IPV4:8301:8301/udp  \
+                  -p $COREOS_PRIVATE_IPV4:8302:8302  \
+                  -p $COREOS_PRIVATE_IPV4:8302:8302/udp  \
+                  -p $COREOS_PRIVATE_IPV4:8400:8400  \
+                  -p $COREOS_PRIVATE_IPV4:8500:8500  \
+                  -p $DOCKER_BRIDGE_IP:53:53/udp \
+                  -e SERVICE_IGNORE=true \
+                  progrium/consul -advertise $COREOS_PRIVATE_IPV4"
+
+        if [ $AGENT_NUMBER -le $EXPECTED_CONSUL_SERVERS ]; then
+        CONSUL_CMD="$CONSUL_CMD -bootstrap-expect $EXPECTED_CONSUL_SERVERS -server"
+        fi
+        eval "$CONSUL_CMD"
