@@ -1,0 +1,55 @@
+#cloud-config
+
+coreos:
+  update:
+    # https://coreos.com/os/docs/latest/cloud-config.html
+    etcd-lock: on
+  etcd2:
+    #generate a new token for each unique cluster from https://discovery.etcd.io/new
+    discovery: https://discovery.etcd.io/2b83e3eedd469f1277f09c068d5a681c
+    # multi-region and multi-cloud deployments need to use $public_ipv4
+    advertise-client-urls: http://$public_ipv4:2379
+    initial-advertise-peer-urls: http://$private_ipv4:2380
+    # listen on both the official ports and the legacy ports
+    # legacy ports can be omitted if your application doesn't depend on them
+    listen-client-urls: http://0.0.0.0:2379,http://0.0.0.0:4001
+    listen-peer-urls: http://$private_ipv4:2380,http://$private_ipv4:7001
+  fleet:
+    public-ip: $public_ipv4
+  units:
+    - name: etcd2.service
+      command: start
+    - name: fleet.service
+      command: start
+    - name: docker.service
+      drop-ins:
+      - name: 50-bip-add.conf
+        content: |
+          [Service]
+          Environment='DOCKER_OPTS=--bip "172.17.42.1/16"'
+    - name: docker-tcp.socket
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=Docker Socket for the API
+
+        [Socket]
+        ListenStream=2375
+        Service=docker.service
+        BindIPv6Only=both
+
+        [Install]
+        WantedBy=sockets.target
+    - name: consul.service
+      command: start
+      runtime: no
+      content: |
+        [Unit]
+        Description=fleet
+
+        [Service]
+        ExecStartPre=-/usr/bin/mkdir /opt
+        ExecStartPre=-/usr/bin/wget --retry-connrefused -t 0 -nc -O /opt/bootstrap-consul https://gist.githubusercontent.com/philips/56fa3f5dae9060fbd100/raw/b0190c7a01a3500e12f92946e6bbf77bc418c3ca/gistfile1.txt
+        ExecStartPre=-/usr/bin/chmod +x /opt/bootstrap-consul
+        ExecStart=/opt/bootstrap-consul
