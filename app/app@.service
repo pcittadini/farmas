@@ -17,8 +17,8 @@ ExecStartPre=/usr/bin/docker pull snowpunk/app:latest
 
 ExecStart=/usr/bin/docker run --rm -e COREOS_PRIVATE_IPV4=${COREOS_PRIVATE_IPV4} --name=app-%i --publish 8080:8080 snowpunk/app:latest
 
-ExecStop=-/usr/bin/docker stop app-%i
-ExecStop=-/usr/bin/docker rm app-%i
+ExecStopPre=-/usr/bin/docker stop app-%i
+ExecStopPre=-/usr/bin/docker rm app-%i
 
 ExecStop=-/usr/bin/etcdctl rm --recursive /services/nginx/app/servers/%i
 
