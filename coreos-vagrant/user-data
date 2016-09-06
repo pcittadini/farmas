@@ -5,7 +5,7 @@ coreos:
     reboot-strategy: etcd-lock
   etcd2:
     #generate a new token for each unique cluster from https://discovery.etcd.io/new
-    discovery: https://discovery.etcd.io/62523a14e6ae22a30bce00b4c816138d
+    discovery: https://discovery.etcd.io/1834a31b703caaacf836f3a461662a48
     # multi-region and multi-cloud deployments need to use $public_ipv4
     advertise-client-urls: http://$public_ipv4:2379
     initial-advertise-peer-urls: http://$private_ipv4:2380
