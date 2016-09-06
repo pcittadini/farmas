@@ -1,4 +1,4 @@
-#!/bin.bash
+#!/bin/bash
 
 fleetctl stop consul-agent@1.service
 fleetctl stop consul-agent@2.service
